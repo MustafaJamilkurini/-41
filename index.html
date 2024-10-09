@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> تطبيق بيت جلاد لتسجيل 41الشدة</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            direction: rtl;
+            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            width: 60%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label, input {
+            font-size: 16px;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            width: 80%;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 70%;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tfoot td {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        #addRoundBtn {
+            margin-top: 20px;
+            background-color: #2196F3;
+        }
+
+        #addRoundBtn:hover {
+            background-color: #1976D2;
+        }
+
+        #winnerMessage {
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+            display: none;
+            font-size: 18px;
+        }
+
+        /* تنسيق جدول الفائزين */
+        #winnersTable {
+            width: 50%;
+            margin-top: 20px;
+            border: 2px solid #4CAF50;
+        }
+
+        #winnersTable th, #winnersTable td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        #winnersTable th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>المبرمج: مصطفى كوريني</h2>
+
+    <form id="playerForm">
+        <label for="player1">اسم اللاعب 1:</label>
+        <input type="text" id="player1" required><br>
+        <label for="player2">اسم اللاعب 2:</label>
+        <input type="text" id="player2" required><br>
+        <label for="player3">اسم اللاعب 3:</label>
+        <input type="text" id="player3" required><br>
+        <label for="player4">اسم اللاعب 4:</label>
+        <input type="text" id="player4" required><br><br>
+        <button type="button" onclick="createTable()">إنشاء الجدول</button>
+    </form>
+
+    <div id="gameTableContainer" style="display:none;">
+        <h3 id="tableTitle"></h3>
+        <table id="gameTable">
+            <thead>
+                <tr>
+                    <th>الجولة</th>
+                    <th id="header1">اللاعب 1</th>
+                    <th id="header2">اللاعب 2</th>
+                    <th id="header3">اللاعب 3</th>
+                    <th id="header4">اللاعب 4</th>
+                </tr>
+            </thead>
+            <tbody id="gameBody">
+                <!-- يتم إضافة الجولات هنا -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>الإجمالي</td>
+                    <td id="total1"></td>
+                    <td id="total2"></td>
+                    <td id="total3"></td>
+                    <td id="total4"></td>
+                </tr>
+            </tfoot>
+        </table>
+        <button id="addRoundBtn" onclick="addNewRound()">أضف جولة جديدة</button>
+        <p id="winnerMessage">مبروك للفريق الفائز!</p>
+
+        <!-- جدول الفائزين -->
+        <table id="winnersTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>اسم الفائز</th>
+                    <th>رمز الفوز</th>
+                </tr>
+            </thead>
+            <tbody id="winnersBody">
+                <!-- يتم إضافة الفائزين هنا -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let roundCount = 0;
+        let totalScores = [0, 0, 0, 0];
+        let roundValues = [];  // لتخزين القيم الخاصة بكل جولة لكل لاعب
+        let playerNames = [];  // لتخزين أسماء اللاعبين
+
+        function createTable() {
+            playerNames = [
+                document.getElementById('player1').value,
+                document.getElementById('player2').value,
+                document.getElementById('player3').value,
+                document.getElementById('player4').value
+            ];
+
+            document.getElementById('header1').innerText = playerNames[0];
+            document.getElementById('header2').innerText = playerNames[1];
+            document.getElementById('header3').innerText = playerNames[2];
+            document.getElementById('header4').innerText = playerNames[3];
+
+            document.getElementById('tableTitle').innerText = `الجدول الخاص باللاعبين`;
+            document.getElementById('gameTableContainer').style.display = 'block';
+            addNewRound();  // أضف الجولة الأولى تلقائيًا
+        }
+
+        function addNewRound() {
+            roundCount++;
+            const tbody = document.getElementById('gameBody');
+            const newRow = document.createElement('tr');
+            roundValues.push([0, 0, 0, 0]);  // أضف جولة جديدة لقيم الجولات
+            newRow.innerHTML = `
+                <td>جولة ${roundCount}</td>
+                <td><input type="number" value="0" onchange="updateTotal(0, this.value, ${roundCount - 1})"></td>
+                <td><input type="number" value="0" onchange="updateTotal(1, this.value, ${roundCount - 1})"></td>
+                <td><input type="number" value="0" onchange="updateTotal(2, this.value, ${roundCount - 1})"></td>
+                <td><input type="number" value="0" onchange="updateTotal(3, this.value, ${roundCount - 1})"></td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function updateTotal(playerIndex, value, roundIndex) {
+            const oldValue = roundValues[roundIndex][playerIndex];
+            roundValues[roundIndex][playerIndex] = parseInt(value) || 0;  // تحديث القيمة الجديدة للجولة
+
+            // تحديث الإجمالي بناءً على الفرق بين القيمة الجديدة والقديمة
+            totalScores[playerIndex] += roundValues[roundIndex][playerIndex] - oldValue;
+            document.getElementById(`total${playerIndex + 1}`).innerText = totalScores[playerIndex];
+
+            // تغيير اللون بناءً على المجموع الحالي
+            if (totalScores[playerIndex] >= 30 && totalScores[playerIndex] < 41) {
+                document.getElementById(`total${playerIndex + 1}`).style.backgroundColor = 'yellow';
+            } else if (totalScores[playerIndex] >= 41) {
+                document.getElementById(`total${playerIndex + 1}`).style.backgroundColor = 'green';
+                addWinner(playerNames[playerIndex]);  // إضافة اللاعب الفائز
+            } else {
+                document.getElementById(`total${playerIndex + 1}`).style.backgroundColor = 'transparent';
+            }
+        }
+
+        // إضافة اسم الفائز للجدول
+        function addWinner(playerName) {
+            const winnersTable = document.getElementById('winnersTable');
+            const winnersBody = document.getElementById('winnersBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${playerName}</td>
+                <td>😛</td>
+            `;
+            winnersBody.appendChild(newRow);
+            winnersTable.style.display = 'table';  // إظهار جدول الفائزين
+        }
+    </script>
+
+</body>
+</html>
